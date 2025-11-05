@@ -24,7 +24,7 @@ namespace BordFodboldAPI.Objects
         {
             if (team1.Count != 2 || team2.Count != 2)
             {
-                throw new TooManyPlayersException($"Each team must have exactly 2 players." +
+                throw new InvalidTeamSizeException($"Each team must have exactly 2 players." +
                     $"\nTeam 1 Player count: {team1.Count}" +
                     $"\nTeam 2 Player count: {team2.Count}");
             }

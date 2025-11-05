@@ -90,7 +90,7 @@ public class Program
                 await db.SaveChangesAsync();
                 return Results.Ok(match);
             }
-            catch (TooManyPlayersException ex)
+            catch (InvalidTeamSizeException ex)
             {
                 return Results.BadRequest(ex.Message);
             }
@@ -101,6 +101,7 @@ public class Program
         });
 
         // Add match result by specifying match ID and winning team ID (1 or 2)
+        // This could also be a PUT request
         app.MapPost("/AddMatchResult/{matchId}/{winningTeamId}", async (BordFodboldDbContext db, int matchId, int winningTeamId) =>
         {
             var match = await db.Matches.FindAsync(matchId);
@@ -137,7 +138,7 @@ public class Program
                     return Results.BadRequest("Invalid team ID. Must be 1 or 2.");
             }
             await db.SaveChangesAsync();
-            return Results.Ok(match);
+            return Results.Ok(team1Players.Concat(team2Players));
         });
 
         app.Run();
