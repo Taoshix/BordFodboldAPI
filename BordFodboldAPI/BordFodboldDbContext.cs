@@ -12,5 +12,6 @@ namespace BordFodboldAPI
         }
         public DbSet<Player> Players => Set<Player>();
         public DbSet<Match> Matches => Set<Match>();
+        public DbSet<User> Users => Set<User>();
     }
 }

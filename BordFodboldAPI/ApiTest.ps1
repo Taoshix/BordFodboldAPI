@@ -60,3 +60,19 @@ $resultBody = @{
 $matchid = $match.ID
 $result = Invoke-RestMethod -Uri "$baseUrl/AddMatchResult/$matchid/1" -Method POST -ContentType "application/json" -Body ($resultBody | ConvertTo-Json)
 Write-Host "Added Match Result:" ($result | ConvertTo-Json)
+
+# Register user
+$userBody = @{
+    Username = "testuser"
+    Password = "Test@1234"
+}
+$user = Invoke-RestMethod -Uri "$baseUrl/Register" -Method POST -ContentType "application/json" -Body ($userBody | ConvertTo-Json)
+Write-Host "Registered User:" ($user | ConvertTo-Json)
+
+# Login user
+$loginBody = @{
+    Username = "testuser"
+    Password = "Test@1234"
+}
+$loginResponse = Invoke-RestMethod -Uri "$baseUrl/Login" -Method POST -ContentType "application/json" -Body ($loginBody | ConvertTo-Json)
+Write-Host "Login Token:" ($loginResponse.token | ConvertTo-Json)

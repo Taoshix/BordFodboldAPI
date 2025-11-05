@@ -13,6 +13,8 @@ public class Program
             options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
         var app = builder.Build();
 
+        Dictionary<int, string> userTokens = new Dictionary<int, string>();
+
         // Tables might not exist, so we ensure they are created
         using (var scope = app.Services.CreateScope())
         {
@@ -27,7 +29,7 @@ public class Program
             var player = new Player(dto.Name, dto.Initials, dto.Handicap);
             db.Players.Add(player);
             await db.SaveChangesAsync();
-            return player;
+            return Results.Ok(player);
         });
 
 
@@ -139,6 +141,31 @@ public class Program
             }
             await db.SaveChangesAsync();
             return Results.Ok(team1Players.Concat(team2Players));
+        });
+
+        app.MapPost("/Register", async (BordFodboldDbContext db, CreateUserDto dto) =>
+        {
+            var existingUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
+            if (existingUser != null)
+            {
+                return Results.BadRequest("User already exists");
+            }
+            var user = User.CreateUser(dto.UserName, dto.Password);
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+            return Results.Ok(user.UserName);
+        });
+
+        app.MapPost("/Login", async (BordFodboldDbContext db, CreateUserDto dto) =>
+        {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == dto.UserName);
+            if (user == null || !User.VerifyPassword(dto.Password, user.Password))
+            {
+                return Results.Unauthorized();
+            }
+            var token = Guid.NewGuid().ToString();
+            userTokens[user.Id] = token;
+            return Results.Ok(new { Token = token });
         });
 
         app.Run();
