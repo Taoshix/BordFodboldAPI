@@ -4,13 +4,23 @@ namespace BordFodboldAPI.Objects
 {
     public class Match
     {
-        public int Id { get; set; } // Primary key for database
-        public List<Player> Team1 { get; set; }
-        public List<Player> Team2 { get; set; }
-        public int Team1Score { get; set; }
-        public int Team2Score { get; set; }
+        public int Id { get; set; }
+        public int Team1Player1Id { get; set; }
+        public int Team1Player2Id { get; set; }
+        public int Team2Player1Id { get; set; }
+        public int Team2Player2Id { get; set; }
 
-        public Match(List<Player> team1, List<Player> team2, int team1Score = 0, int team2Score = 0)
+        public Match(int team1Player1Id, int team1Player2Id, int team2Player1Id, int team2Player2Id)
+        {
+            Team1Player1Id = team1Player1Id;
+            Team1Player2Id = team1Player2Id;
+            Team2Player1Id = team2Player1Id;
+            Team2Player2Id = team2Player2Id;
+
+        }
+
+
+        public static Match CreateMatch(List<Player> team1, List<Player> team2)
         {
             if (team1.Count != 2 || team2.Count != 2)
             {
@@ -23,10 +33,13 @@ namespace BordFodboldAPI.Objects
                 throw new PlayerOnBothTeamsException("A player cannot be in both teams.");
             }
 
-            Team1 = team1;
-            Team2 = team2;
-            Team1Score = team1Score;
-            Team2Score = team2Score;
+            return new Match(
+                team1[0].Id,
+                team1[1].Id,
+                team2[0].Id,
+                team2[1].Id
+            );
+
         }
     }
 }

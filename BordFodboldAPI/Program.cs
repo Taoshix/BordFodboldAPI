@@ -78,14 +78,14 @@ public class Program
             return Results.Ok(sorted);
         });
 
-        // Create a new match by specifying player IDs for both teams and optionally initial scores
+        // Create a new match by specifying player IDs for both teams
         app.MapPost("/CreateMatch", async (BordFodboldDbContext db, CreateMatchDto dto) =>
         {
             var team1Players = await db.Players.Where(p => dto.Team1PlayerIds.Contains(p.Id)).ToListAsync();
             var team2Players = await db.Players.Where(p => dto.Team2PlayerIds.Contains(p.Id)).ToListAsync();
             try
             {
-                var match = new Match(team1Players, team2Players, dto.Team1Score, dto.Team2Score);
+                var match = Match.CreateMatch(team1Players, team2Players);
                 db.Matches.Add(match);
                 await db.SaveChangesAsync();
                 return Results.Ok(match);
@@ -109,12 +109,11 @@ public class Program
                 return Results.NotFound();
             }
             // Could probably be done in a single query
-            var team1Players = await db.Players.Where(p => match.Team1.Select(tp => tp.Id).Contains(p.Id)).ToListAsync();
-            var team2Players = await db.Players.Where(p => match.Team2.Select(tp => tp.Id).Contains(p.Id)).ToListAsync();
+            var team1Players = await db.Players.Where(p => p.Id == match.Team1Player1Id || p.Id == match.Team1Player2Id).ToListAsync();
+            var team2Players = await db.Players.Where(p => p.Id == match.Team2Player1Id || p.Id == match.Team2Player2Id).ToListAsync();
             switch (winningTeamId)
             {
                 case 1:
-                    match.Team1Score += 1;
                     foreach (var player in team1Players)
                     {
                         player.Handicap += 1;
@@ -125,7 +124,6 @@ public class Program
                     }
                     break;
                 case 2:
-                    match.Team2Score += 1;
                     foreach (var player in team2Players)
                     {
                         player.Handicap += 1;
