@@ -13,6 +13,13 @@ public class Program
             options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
         var app = builder.Build();
 
+        // Tables might not exist, so we ensure they are created
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<BordFodboldDbContext>();
+            db.Database.EnsureCreated();
+        }
+
         // Create new player and save it to database
         // Take a JSON body with Name, Initials and optionally Handicap
         app.MapPost("/CreatePlayer", async (BordFodboldDbContext db, CreatePlayerDto dto) =>
